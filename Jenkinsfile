@@ -3,12 +3,13 @@ pipeline {
 
   environment {
         SONAR_TOKEN = credentials('sonar-token') // Jenkins credential ID
-        SONAR_HOST_URL = 'https://682f562ba0474eb779d91a3f-6fa094.node-ap-a1de.iximiuz.com'
+        SONAR_HOST_URL = 'https://68308f6c8c1b3edc072bf40a-c4bff7.node-ap-a1de.iximiuz.com'
         SONAR_SCANER_HOME= tool 'SonarQube'
     }
     stages {
         stage('Git Checkout') {
             steps {
+                cleanWs()
                 git branch: 'develop', url: 'https://github.com/Shopping-App-Services/recommendation-service.git'
             }
         }
@@ -16,29 +17,18 @@ pipeline {
             steps {
                 sh '''
                 # Remove any existing virtual environments
-                rm -rf venv
+                #rm -rf venv
                 # Create a new virtual environment
-                python3 -m venv venv
-                chmod -R 755 venv
+                #python3 -m venv venv
+                #chmod -R 755 venv
                 # Activate the virtual environment and install dependencies
-                . venv/bin/activate && \
-                pip install --upgrade pip && \
+                #. venv/bin/activate && \
+                #pip install --upgrade pip && \
                 pip install -r requirements.txt
                 '''
             }
         }
-        stage('Test') {
-            steps {
-                sh '''
-                  # Activate the virtual environment and run tests
-                . venv/bin/activate && \
-                pip install pytest && \
-                pip install pytest-cov && \
-                pytest --cov=app --cov-report=xml && \
-                pytest --cov=app --cov-report=term-missing --disable-warnings
-                '''
-            }
-        }
+
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -46,9 +36,9 @@ pipeline {
                      sh '''
                     ${SONAR_SCANER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=RecommendationService \
-                       -Dsonar.exclusions=venv/** \
+                        -Dsonar.exclusions=venv/** \
                         -Dsonar.sources=. \
-                        -Dsonar.python.coverage.reportPaths=coverage.xml
+                        -Dsonar.python.coverage.reportPaths=coverage.xml \
                         -Dsonar.verbose=true
                     '''
                     }  
@@ -62,17 +52,29 @@ pipeline {
                 }
             }
         }
+                stage('Test') {
+            steps {
+                sh '''
+                  # Activate the virtual environment and run tests
+                #. venv/bin/activate && \
+                pip install pytest && \
+                pip install pytest-cov && \
+                pytest --cov=app --cov-report=xml && \
+                pytest --cov=app --cov-report=term-missing --disable-warnings
+                '''
+            }
+        }
         stage('Build') {
             steps {
                 sh '''
                 # Remove any existing virtual environments
-                rm -rf venv
+                #rm -rf venv
                 # Create a new virtual environment
-                python3 -m venv venv
-                chmod -R 755 venv
+                #python3 -m venv venv
+                #chmod -R 755 venv
                 # Activate the virtual environment and install dependencies
-                . venv/bin/activate && \
-                pip install --upgrade pip && \
+                #. venv/bin/activate && \
+                #pip install --upgrade pip && \
                 pip install -r requirements.txt
             '''
             }
@@ -81,7 +83,7 @@ pipeline {
             steps {
                 script {
                     // This step should not normally be used in your script. Consult the inline help for details.
-                   withDockerRegistry(credentialsId: 'fb045f21-4646-4b13-9a81-aae491da4b94', toolName: 'docker') {
+                   withDockerRegistry(credentialsId: '20226572-5e4c-4db0-ad81-6762251b3d09', toolName: 'docker') {
                         sh 'ls -latr'
                         sh "docker build -t recommendation-service ."
                         sh "docker tag recommendation-service nitesh2611/recommendation-service:latest "
@@ -92,5 +94,4 @@ pipeline {
         }
     }
 }
-
 
