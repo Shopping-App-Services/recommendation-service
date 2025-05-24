@@ -3,7 +3,7 @@ pipeline {
 
   environment {
         SONAR_TOKEN = credentials('sonar-token') // Jenkins credential ID
-        SONAR_HOST_URL = 'https://68308f6c8c1b3edc072bf40a-c4bff7.node-ap-a1de.iximiuz.com'
+        SONAR_HOST_URL = '${SONAR_HOST_URL}'
         SONAR_SCANER_HOME= tool 'SonarQube'
     }
     stages {
@@ -83,7 +83,7 @@ pipeline {
             steps {
                 script {
                     // This step should not normally be used in your script. Consult the inline help for details.
-                   withDockerRegistry(credentialsId: '20226572-5e4c-4db0-ad81-6762251b3d09', toolName: 'docker') {
+                   withDockerRegistry(credentialsId: 'docker-token', toolName: 'docker') {
                         sh 'ls -latr'
                         sh "docker build -t recommendation-service ."
                         sh "docker tag recommendation-service nitesh2611/recommendation-service:latest "
